@@ -1,0 +1,7 @@
+{
+  "clientId":"k0zisw6ZO1s.Receiver|securemode=2,signmethod=hmacsha256,timestamp=1736176155489|",
+  "username":"Receiver&k0zisw6ZO1s",
+  "mqttHostUrl":"iot-06z00hk3a6g3r82.mqtt.iothub.aliyuncs.com",
+  "passwd":"9608df3e9abe09c43d0c4c59329790b43a797abf18e619a6e8bb949a1eb83815",
+  "port":1883
+}
