@@ -6,6 +6,13 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * MqttSender
+ * Send message object to mqtt server
+ * @version 1.0 2025-01-07
+ * @since 2025-01-06
+ * @author Cacc
+ */
 public class MqttSender {
 
     private static final String PRODUCT_KEY = "k0zisw6ZO1s";
@@ -28,7 +35,7 @@ public class MqttSender {
             options.setAutomaticReconnect(true);
 
             client.connect(options);
-            System.out.println("MQTT 发送端连接成功！");
+            System.out.println("MQTT sender connected!");
 
             String topic = "/" + PRODUCT_KEY + "/" + DEVICE_NAME + "/user/update";
 
@@ -37,11 +44,9 @@ public class MqttSender {
             MqttMessage message = new MqttMessage(payload.getBytes(StandardCharsets.UTF_8));
             message.setQos(0);
 
-            // 发布数据
             client.publish(topic, message);
-            System.out.println("数据上报成功");
+            System.out.println("Message published!");
 
-            // 断开连接
             client.disconnect();
             client.close();
         } catch (Exception e) {

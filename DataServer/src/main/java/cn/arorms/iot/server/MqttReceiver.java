@@ -1,5 +1,8 @@
 package cn.arorms.iot.server;
 
+import cn.arorms.iot.server.entity.Message;
+import cn.arorms.iot.server.service.MessageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.nio.charset.StandardCharsets;
@@ -9,16 +12,25 @@ import java.nio.charset.StandardCharsets;
  * Receive sender message from Aliyun Iot server
  * @version 1.0 2025-01-06
  * @since 2025-01-06
- * @author Holmes Amzish
+ * @author Cacc
  */
 public class MqttReceiver {
+
+    private final MessageService messageService;
 
     private static final String PRODUCT_KEY = "k0zisw6ZO1s";
     private static final String DEVICE_NAME = "Receiver";
     private static final String REGION_ID = "cn-shanghai";
     private static final int PORT = 1883;
 
+    public MqttReceiver(MessageService messageService) {
+        this.messageService = messageService;
+    }
+
     public static void main(String[] args) {
+        MessageService messageService = new MessageService();
+        MqttReceiver receiver = new MqttReceiver(messageService);
+
         try {
             long timestamp = System.currentTimeMillis();
             String clientId = "k0zisw6ZO1s.Receiver|securemode=2,signmethod=hmacsha256,timestamp=1736176155489|";
@@ -34,7 +46,6 @@ public class MqttReceiver {
             options.setCleanSession(false);
             options.setAutomaticReconnect(true);
 
-            // 设置回调
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
@@ -44,22 +55,28 @@ public class MqttReceiver {
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     System.out.println("Received message from [" + topic + "]: " + new String(message.getPayload(), StandardCharsets.UTF_8));
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        Message msg = objectMapper.readValue(message.getPayload(), Message.class);
+                        receiver.messageService.insertMessage(msg);
+                    } catch (Exception e) {
+                        System.err.println("Error parsing message to Message object: " + e.getMessage());
+                    }
                 }
 
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken token) {
-                    // 发布消息完成后的回调，这里可以忽略
+
                 }
             });
 
-            // 连接到代理
             client.connect(options);
-            System.out.println("MQTT 接收端连接成功！");
+            System.out.println("MQTT connect successful!");
 
             // Subscribe topic
             String subscribeTopic = "/" + PRODUCT_KEY + "/" + DEVICE_NAME + "/user/get";
             client.subscribe(subscribeTopic);
-            System.out.println("已订阅主题: " + subscribeTopic);
+            System.out.println("Topic subscribed: " + subscribeTopic);
 
             // Keep listening
             while (true) {
@@ -70,5 +87,4 @@ public class MqttReceiver {
             e.printStackTrace();
         }
     }
-
 }

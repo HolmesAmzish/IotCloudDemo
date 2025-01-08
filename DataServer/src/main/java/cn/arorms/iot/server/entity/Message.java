@@ -1,11 +1,26 @@
 package cn.arorms.iot.server.entity;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
+/**
+ * Message entity
+ * @version 1.0 2025-01-07
+ * @since 2025-01-07
+ * @author Holmes Amzish
+ */
+@Data
 public class Message {
-    String username;
-    String type;
-    String content;
+    public Integer id;
+    public String username;
+    public String type;
+    public String content;
+    public LocalDateTime time;
+
+    public Message() {
+
+    }
 
     public Message(String username, String type, String content) {
         this.username = username;
@@ -13,27 +28,14 @@ public class Message {
         this.content = content;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", type='" + type + '\'' +
+                ", content='" + content + '\'' +
+                ", time=" + time +
+                '}';
     }
 }
