@@ -2,18 +2,25 @@ package cn.arorms.iot.server;
 
 import cn.arorms.iot.server.entity.Message;
 import cn.arorms.iot.server.service.MessageService;
+import cn.arorms.iot.server.websocket.WebSocketServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.springframework.stereotype.Component;
+
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 /**
- * MqttReceiver running on server
- * Receive sender message from Aliyun Iot server
- * @version 1.0 2025-01-06
+ * MQTT Receiver
+ * @version 1.0 2025-01-09
  * @since 2025-01-06
- * @author Cacc
  */
+@Component
+@Slf4j
 public class MqttReceiver {
 
     private final MessageService messageService;
@@ -27,10 +34,8 @@ public class MqttReceiver {
         this.messageService = messageService;
     }
 
-    public static void main(String[] args) {
-        MessageService messageService = new MessageService();
-        MqttReceiver receiver = new MqttReceiver(messageService);
-
+    @PostConstruct
+    public void init() {
         try {
             long timestamp = System.currentTimeMillis();
             String clientId = "k0zisw6ZO1s.Receiver|securemode=2,signmethod=hmacsha256,timestamp=1736176155489|";
@@ -49,20 +54,29 @@ public class MqttReceiver {
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
-                    System.out.println("Connection lost: " + cause.getMessage());
+                    log.error("connectionLost", cause.getMessage());
                 }
 
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    System.out.println("Received message from [" + topic + "]: " + new String(message.getPayload(), StandardCharsets.UTF_8));
+                    String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
+                    log.info("Received message from [{}]: {}", topic, payload);
+
                     ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.registerModule(new JavaTimeModule());
                     try {
                         Message msg = objectMapper.readValue(message.getPayload(), Message.class);
-                        receiver.messageService.insertMessage(msg);
+                        msg.setTime(LocalDateTime.now());
+                        messageService.insertMessage(msg);
+                        String formattedMessage = objectMapper.writeValueAsString(msg);
+                        // 推送到WebSocket
+                        log.info("Sending message to WebSocket: {}", formattedMessage);
+                        WebSocketServer.sendMessageToAll(formattedMessage);
                     } catch (Exception e) {
-                        System.err.println("Error parsing message to Message object: " + e.getMessage());
+                        log.error("Error parsing message to Message object: {}", e.getMessage());
                     }
                 }
+
 
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken token) {
@@ -71,17 +85,12 @@ public class MqttReceiver {
             });
 
             client.connect(options);
-            System.out.println("MQTT connect successful!");
+            log.info("MQTT connect successful!");
 
             // Subscribe topic
             String subscribeTopic = "/" + PRODUCT_KEY + "/" + DEVICE_NAME + "/user/get";
             client.subscribe(subscribeTopic);
-            System.out.println("Topic subscribed: " + subscribeTopic);
-
-            // Keep listening
-            while (true) {
-                Thread.sleep(1000);
-            }
+            log.info("Topic subscribed: {}", subscribeTopic);
 
         } catch (Exception e) {
             e.printStackTrace();

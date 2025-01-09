@@ -12,15 +12,24 @@
     </resultMap>
 
     <insert id="insertMessage">
-        INSERT INTO messages (username, type, content)
-        VALUES (#{username}, #{type}, #{content});
+        INSERT INTO messages (username, type, content, created_at)
+        VALUES (#{username}, #{type}, #{content}, #{time});
     </insert>
 
     <select id="getAllMessage" resultMap="MessageResultMap">
-        SELECT * FROM messages;
+        SELECT * FROM messages
+        ORDER BY id DESC;
     </select>
 
     <select id="getMessageById" resultMap="MessageResultMap">
         SELECT * FROM messages WHERE id=#{id};
     </select>
+
+    <select id="getMessagesByPage" resultMap="MessageResultMap">
+        SELECT *
+        FROM messages
+        ORDER BY id DESC
+        LIMIT #{offset}, #{pageSize};
+    </select>
+
 </mapper>

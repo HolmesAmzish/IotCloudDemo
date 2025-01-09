@@ -2,6 +2,7 @@ package cn.arorms.iot.server.service;
 
 import cn.arorms.iot.server.mapper.MessageMapper;
 import cn.arorms.iot.server.entity.Message;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -18,6 +19,7 @@ import java.util.List;
  * @since 2025-01-07
  */
 @Service
+@Slf4j
 public class MessageService {
     private static SqlSessionFactory sqlSessionFactory;
 
@@ -36,7 +38,7 @@ public class MessageService {
             MessageMapper mapper = session.getMapper(MessageMapper.class);
             mapper.insertMessage(msg);
             session.commit();
-            System.out.println("Message inserted");
+            log.info("Message inserted");
         }
     }
 
@@ -44,7 +46,7 @@ public class MessageService {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             MessageMapper mapper = session.getMapper(MessageMapper.class);
             List<Message> messageList = mapper.getAllMessage();
-            System.out.println("All message got.");
+            log.info("All message got.");
             return messageList;
         }
     }
@@ -53,8 +55,16 @@ public class MessageService {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             MessageMapper mapper = session.getMapper(MessageMapper.class);
             Message message = mapper.getMessageById(id);
-            System.out.println(String.format("Message No.%d got.", id));
+            log.info(String.format("Message No.%d got.", id));
             return message;
+        }
+    }
+
+    public List<Message> getMessagesByPage(int page, int pageSize) {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            MessageMapper mapper = session.getMapper(MessageMapper.class);
+            int offset = (page - 1) * pageSize; // 计算起始行
+            return mapper.getMessagesByPage(offset, pageSize);
         }
     }
 }

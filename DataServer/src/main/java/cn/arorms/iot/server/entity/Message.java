@@ -1,5 +1,6 @@
 package cn.arorms.iot.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,8 @@ public class Message {
     public String username;
     public String type;
     public String content;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime time;
 
     public Message() {

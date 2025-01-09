@@ -16,4 +16,5 @@ public interface MessageMapper {
     void insertMessage(Message message);
     List<Message> getAllMessage();
     Message getMessageById(int id);
+    List<Message> getMessagesByPage(int offset, int pageSize);
 }

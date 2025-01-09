@@ -3,11 +3,18 @@ package cn.arorms.iot.server;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @SpringBootApplication
-@MapperScan("cn.arorms.iot.server.mapper")  // 指定 mapper 所在的包路径
 public class DataServerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(DataServerApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(DataServerApplication.class, args);
     }
+
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
+
 }
