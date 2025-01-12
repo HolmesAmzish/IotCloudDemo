@@ -35,7 +35,16 @@
 
 <script>
     // WebSocket Initialization
-    const socket = new WebSocket("ws://localhost:8080/websocket");
+    // Generate WebSocket address
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const host = window.location.host;
+    const path = "/websocket";
+
+    const socket = new WebSocket(protocol + host + path);
+
+    // Log
+    console.log(`Connecting to WebSocket at ${protocol + host + path}`);
+
     const maxRows = 50; // Maximum rows in the table
     const statusDiv = document.getElementById("status");
     const tableBody = document.getElementById("message-table-body");

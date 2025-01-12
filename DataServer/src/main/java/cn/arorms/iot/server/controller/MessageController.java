@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.List;
 
 /**
@@ -22,17 +21,15 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
-    // 显示所有消息
     @GetMapping("/messages")
     public String message(Model model) {
-        return "messages";  // 对应 messages.html
+        return "messages";
     }
 
-    // 显示单条消息
     @GetMapping("/history")
     public String printMessageByPage(
-            @RequestParam(defaultValue = "1") int page,  // 当前页数，默认为第 1 页
-            @RequestParam(defaultValue = "50") int pageSize,  // 每页条数，默认为 50
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "50") int pageSize,
             Model model) {
         List<Message> messages = messageService.getMessagesByPage(page, pageSize);
         model.addAttribute("messages", messages);
@@ -40,7 +37,6 @@ public class MessageController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("nextPage", page + 1);
         model.addAttribute("prevPage", Math.max(page - 1, 1));
-        return "history"; // 对应 history.html
+        return "history";
     }
-
 }
